@@ -3,13 +3,16 @@
   "name": "neonwatty-plugins",
   "description": "Job Apply plugins for Codex and Claude Code by Jeremy Watt",
   "owner": {
-    "name": "Jeremy Watt",
-    "github": "neonwatty"
+    "name": "erattas",
+    "github": "erattas"
   },
   "plugins": [
     {
       "name": "job-apply",
-      "source": "./",
+      "source": {
+        "source": "github",
+        "repo": "erattas/job-apply-plugin"
+      },
       "description": "AI-powered job application assistant for Claude Code and Codex covering LinkedIn, Greenhouse, Ashby, Lever, Rippling, and Workday",
       "category": "productivity"
     }
