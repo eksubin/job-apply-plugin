@@ -19,7 +19,7 @@ class FinalActionDocumentationTests(unittest.TestCase):
         self.assertTrue(CHECKER.violations_for_text(text), text)
 
     def test_committed_job_apply_policy_is_accepted(self):
-        skill = (ROOT / "skills" / "job-apply" / "SKILL.md").read_text(
+        skill = (ROOT / "skills" / "athena" / "SKILL.md").read_text(
             encoding="utf-8"
         )
         self.assertAccepted(skill)

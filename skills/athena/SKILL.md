@@ -1,12 +1,12 @@
 ---
-name: job-apply
-description: Fill out job applications automatically using your resume. Use when the user wants to apply for jobs on LinkedIn Easy Apply, Greenhouse, Ashby, Lever, Rippling, or Workday.
+name: athena
+description: Fill out job applications automatically using your resume. Use when the user wants to apply for jobs on LinkedIn Easy Apply, Greenhouse, Ashby, Lever, Rippling, or Workday. Formerly known as job-apply.
 allowed-tools: Read, Write, Bash, mcp__claude-in-chrome__*, mcp__plugin_playwright_playwright__*
 ---
 
-# Job Application Assistant
+# Athena — Job Application Assistant
 
-A Codex and Claude Code skill for filling job applications on LinkedIn Easy Apply, Greenhouse, Ashby, Lever, Rippling, and Workday using visible browser automation.
+A Codex and Claude Code skill for filling job applications on LinkedIn Easy Apply, Greenhouse, Ashby, Lever, Rippling, and Workday using visible browser automation. Invoke as `$job-apply:athena` (Codex) or `/job-apply:athena` (Claude Code).
 
 ## Initial Prompt
 
@@ -320,13 +320,13 @@ In Codex, stay inside the selected Browser plugin surface. In Claude Code, if a 
 
 **Default (stop at review):**
 ```
-Codex: $job-apply:job-apply https://www.linkedin.com/jobs/view/123456789
-Claude Code: /job-apply:job-apply https://www.linkedin.com/jobs/view/123456789
+Codex: $job-apply:athena https://www.linkedin.com/jobs/view/123456789
+Claude Code: /job-apply:athena https://www.linkedin.com/jobs/view/123456789
 ```
 
 **Auto-submit (fill and submit):**
 ```
-Codex: $job-apply:job-apply https://www.linkedin.com/jobs/view/123456789 submit
-Claude Code: /job-apply:job-apply https://www.linkedin.com/jobs/view/123456789 submit
+Codex: $job-apply:athena https://www.linkedin.com/jobs/view/123456789 submit
+Claude Code: /job-apply:athena https://www.linkedin.com/jobs/view/123456789 submit
 User: Apply to this job and submit for me: https://www.linkedin.com/jobs/view/123456789
 ```

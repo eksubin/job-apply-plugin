@@ -33,7 +33,7 @@ SYNTHETIC_RESUME_SHA256 = (
     "04eab9c3265232cf4950631ca2c8a1e1b3070da6d441ebb8953221ced8c55274"
 )
 PROMPT = (
-    "Use job-apply:job-apply on this approved local LinkedIn Easy Apply QA "
+    "Use job-apply:athena on this approved local LinkedIn Easy Apply QA "
     "fixture: {url}. Use the isolated QA profile already prepared for this "
     "run. Operate the visible form normally and stop at final review exactly "
     "as you would on a live application."
@@ -1612,7 +1612,7 @@ class ReplayCoordinatorTests(unittest.TestCase):
 
     def test_skills_document_mandatory_qa_root_routing(self) -> None:
         answer_memory = (ROOT / "skills/answer-memory/SKILL.md").read_text()
-        job_apply = (ROOT / "skills/job-apply/SKILL.md").read_text()
+        job_apply = (ROOT / "skills/athena/SKILL.md").read_text()
         for document in (answer_memory, job_apply):
             self.assertIn("qa-replay.py", document)
             self.assertIn("--route-token", document)

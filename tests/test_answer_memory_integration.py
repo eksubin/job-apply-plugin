@@ -162,29 +162,29 @@ class AnswerMemoryIntegrationTests(unittest.TestCase):
             for path in (ROOT / "skills").glob("*/SKILL.md")
         }
         self.assertEqual(
-            set(skills), {"answer-memory", "job-apply", "job-preferences", "job-search"}
+            set(skills), {"answer-memory", "athena", "job-preferences", "job-search"}
         )
         for name, content in skills.items():
             self.assertIn("job-apply-store.py", content, name)
-        for name in ("job-apply", "job-preferences", "job-search"):
+        for name in ("athena", "job-preferences", "job-search"):
             self.assertNotIn("Read `~/.claude-job-profile.json`", skills[name])
             self.assertNotIn("Write the collected values into `~/.claude-job-profile.json`", skills[name])
         self.assertIn("--remember-sensitive", skills["answer-memory"])
         self.assertIn("Permission to fill is not permission to remember", skills["answer-memory"])
         self.assertIn(
             "Submit only when explicitly requested",
-            skills["job-apply"],
+            skills["athena"],
         )
-        self.assertIn("review_only", skills["job-apply"])
-        self.assertIn("job_apply_policy.py", skills["job-apply"])
-        self.assertIn("atomically claims one final action", skills["job-apply"])
+        self.assertIn("review_only", skills["athena"])
+        self.assertIn("job_apply_policy.py", skills["athena"])
+        self.assertIn("atomically claims one final action", skills["athena"])
 
         storage_contract = (
             ROOT / "skills/answer-memory/references/storage-contract.md"
         ).read_text()
         self.assertIn("Greenhouse, LinkedIn Easy Apply, Ashby, and Lever", storage_contract)
-        self.assertIn("isolated loopback QA adapter", skills["job-apply"])
-        self.assertIn("user explicitly requested auto-submit", skills["job-apply"])
+        self.assertIn("isolated loopback QA adapter", skills["athena"])
+        self.assertIn("user explicitly requested auto-submit", skills["athena"])
         self.assertIn("Auto-submit policy", skills["answer-memory"])
 
     def test_lever_replay_lifecycle_uses_value_free_store_records(self):

@@ -8,7 +8,7 @@ AI-powered job application assistant for Claude Code and Codex that fills job ap
 
 | Skill | Description |
 |-------|-------------|
-| `job-apply:job-apply` | Fill out job applications automatically using your resume |
+| `job-apply:athena` | Fill out job applications automatically using your resume |
 | `job-apply:answer-memory` | Safely manage your local profile, reusable answers, application history, and resumable sessions |
 | `job-apply:job-search` | Search LinkedIn, Hacker News, and Twitter/X for jobs, then rank results against your preferences |
 | `job-apply:job-preferences` | Set the titles, salary, remote-work, and filtering preferences used by job search |
@@ -17,7 +17,7 @@ Invoke skills with `$job-apply:...` in Codex or `/job-apply:...` in Claude Code.
 
 ## Features
 
-### Job Apply (`job-apply:job-apply`)
+### Athena (`job-apply:athena`)
 - **One-time profile setup**: Extract your information from a resume (PDF, DOCX, or TXT)
 - **Guided ATS coverage**: Workflows for LinkedIn Easy Apply, Greenhouse, Ashby, Lever, Rippling, and Workday, with current forms unverified
 - **Visible browser automation**: Codex Browser/Chrome or Claude in Chrome fills forms in a session you can see and control
@@ -64,7 +64,7 @@ codex plugin marketplace add neonwatty/job-apply-plugin
 codex plugin add job-apply@neonwatty-plugins
 ```
 
-Start a new Codex task after installation, then invoke `$job-apply:job-apply`.
+Start a new Codex task after installation, then invoke `$job-apply:athena`.
 
 ### Claude Code
 
@@ -73,7 +73,7 @@ claude plugin marketplace add neonwatty/job-apply-plugin
 claude plugin install job-apply@neonwatty-plugins
 ```
 
-Start a new Claude Code session after installation, then invoke `/job-apply:job-apply`.
+Start a new Claude Code session after installation, then invoke `/job-apply:athena`.
 
 ## Usage
 
@@ -83,7 +83,7 @@ The examples below use Codex syntax. In Claude Code, replace the leading `$` wit
 
 1. Invoke the skill:
    ```
-   $job-apply:job-apply
+   $job-apply:athena
    ```
 
 2. Provide your resume path when prompted:
@@ -99,7 +99,7 @@ Once your profile is set up:
 
 1. Invoke the skill:
    ```
-   $job-apply:job-apply
+   $job-apply:athena
    ```
 
 2. Provide a job URL:
@@ -200,7 +200,7 @@ Only matching, non-sensitive `confirmed` answers may be reused without asking. I
 
 To replace the stored profile from a new resume:
 ```
-$job-apply:job-apply reset profile
+$job-apply:athena reset profile
 ```
 
 To remove Job Apply data, close Codex or Claude Code and first move the directory to a private backup so recovery remains possible, for example `mv ~/.job-apply ~/.job-apply.backup`. Shared search-result Markdown files are separate under `~/.claude-job-searches/`; review them independently. The legacy `~/.claude-job-profile.json` is also separate and is never deleted automatically.
@@ -236,7 +236,7 @@ Before applying:
 
 1. In Codex, enable the Browser plugin and select its visible browser surface. In Claude Code, connect Claude in Chrome.
 2. Sign in to the job site yourself in the visible tab you want the agent to use.
-3. Keep your resume at a readable local path, then run `$job-apply:job-apply` in Codex or `/job-apply:job-apply` in Claude Code and provide a test or intended job URL.
+3. Keep your resume at a readable local path, then run `$job-apply:athena` in Codex or `/job-apply:athena` in Claude Code and provide a test or intended job URL.
 4. Confirm the agent can read the page before allowing it to fill any fields.
 
 If the skill cannot see the page, reconnect the active browser surface and refresh the tab. If login, CAPTCHA, MFA, or account creation appears, complete it yourself and then tell the agent to continue. ATS markup changes frequently; if the browser cannot reach an iframe, upload widget, or custom control, complete the remaining field manually. Claude Code may also use an already-configured Playwright integration for one blocked control. The plugin does not bypass blocked controls or guarantee every form on a platform will work.

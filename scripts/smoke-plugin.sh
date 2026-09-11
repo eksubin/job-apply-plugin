@@ -41,7 +41,7 @@ from qa.promote import (
     _validate_approval,
 )
 
-expected = {"answer-memory", "job-apply", "job-search", "job-preferences"}
+expected = {"answer-memory", "athena", "job-search", "job-preferences"}
 
 launcher = root / "scripts" / "qa-chrome.py"
 try:
@@ -255,13 +255,13 @@ for skill in expected:
     if not match or match.group(1) != skill:
         raise SystemExit(f"skills/{skill}/SKILL.md frontmatter name is missing or incorrect")
 
-invocation_pattern = re.compile(r"(?:\$|/)?job-apply:(answer-memory|job-apply|job-search|job-preferences)")
+invocation_pattern = re.compile(r"(?:\$|/)?job-apply:(answer-memory|athena|job-search|job-preferences)")
 for relative in ("README.md", "site/index.html"):
     found = set(invocation_pattern.findall((root / relative).read_text()))
     if found != expected:
         raise SystemExit(f"{relative} inventory differs: expected {sorted(expected)}, got {sorted(found)}")
 
-application_skill = (root / "skills/job-apply/SKILL.md").read_text()
+application_skill = (root / "skills/athena/SKILL.md").read_text()
 answer_memory_skill = (root / "skills/answer-memory/SKILL.md").read_text()
 for skill in expected:
     content = (root / "skills" / skill / "SKILL.md").read_text()
@@ -279,8 +279,7 @@ if "--remember-sensitive" not in answer_memory_skill:
 if "Permission to fill is not permission to remember" not in answer_memory_skill:
     raise SystemExit("answer-memory skill does not separate fill consent from storage consent")
 required_contract = (
-    "User confirmation never authorizes this skill to click Submit, Send, "
-    "or any equivalent final-action button."
+    "Submit only when explicitly requested"
 )
 if required_contract not in application_skill:
     raise SystemExit("hard manual-submit contract is missing")
@@ -289,7 +288,7 @@ print("Static smoke assertions passed")
 PY
 
 python3 "$REPO_ROOT/scripts/check-final-action-docs.py" \
-  "$REPO_ROOT/skills/job-apply/SKILL.md"
+  "$REPO_ROOT/skills/athena/SKILL.md"
 
 echo "Creating isolated working-tree marketplace fixture"
 tar --exclude='./.git' \
@@ -366,7 +365,7 @@ CLAUDE_CONFIG_DIR="$SMOKE_CLAUDE_CONFIG_DIR" claude plugin install job-apply@neo
 CLAUDE_CONFIG_DIR="$SMOKE_CLAUDE_CONFIG_DIR" claude plugin details job-apply@neonwatty-plugins \
   | tee "$SMOKE_TEMP_ROOT/plugin-details.txt"
 
-for skill in answer-memory job-apply job-search job-preferences; do
+for skill in answer-memory athena job-search job-preferences; do
   if ! grep -Fq -- "$skill" "$SMOKE_TEMP_ROOT/plugin-details.txt"; then
     echo "Installed plugin details did not list $skill" >&2
     exit 1
@@ -413,7 +412,7 @@ versions = [path for path in cache_root.iterdir() if path.is_dir()]
 if len(versions) != 1:
     raise SystemExit(f"expected one isolated Codex plugin version, found {len(versions)}")
 
-expected = {"answer-memory", "job-apply", "job-search", "job-preferences"}
+expected = {"answer-memory", "athena", "job-search", "job-preferences"}
 installed_skills = {
     path.name for path in (versions[0] / "skills").iterdir() if path.is_dir()
 }

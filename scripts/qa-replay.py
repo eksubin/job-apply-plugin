@@ -62,7 +62,7 @@ MAX_CLEANUP_DEPTH = 32
 STARTUP_TIMEOUT_SECONDS = 10
 REQUEST_TIMEOUT_SECONDS = 5
 PROMPT = (
-    "Use job-apply:job-apply on this approved local {platform} QA "
+    "Use job-apply:athena on this approved local {platform} QA "
     "fixture: {url}. Use the isolated QA profile already prepared for this "
     "run. Operate the visible form normally and stop at final review exactly "
     "as you would on a live application."

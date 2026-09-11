@@ -717,7 +717,7 @@ python3 scripts/qa-replay.py evaluate --run-id qa-run-20260811-001
 `prepare` copies a checked-in synthetic profile and resume into a new ignored run directory, initializes the store through `scripts/job-apply-store.py --root`, starts `qa.server`, and prints this prompt with the actual URL substituted:
 
 ```text
-Use job-apply:job-apply on this approved local LinkedIn Easy Apply QA fixture: {fixture_url}. Use the isolated QA profile already prepared for this run. Operate the visible form normally and stop at final review exactly as you would on a live application.
+Use job-apply:athena on this approved local LinkedIn Easy Apply QA fixture: {fixture_url}. Use the isolated QA profile already prepared for this run. Operate the visible form normally and stop at final review exactly as you would on a live application.
 ```
 
 Do not invoke Codex or Claude automatically in Milestone 1. The tester invokes the normal installed/working-tree skill in a visible host session. `evaluate` calls `evaluate_run` and writes only synthetic/redacted results.
