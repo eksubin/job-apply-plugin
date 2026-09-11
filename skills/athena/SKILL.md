@@ -24,11 +24,11 @@ After evaluation, or if the QA replay is abandoned, run `python3 "<plugin-root>/
 >
 > First, I need to set up your profile. This is a one-time process — your information will be saved for future applications.
 >
-> **Please provide the path to your resume file** (PDF, DOCX, or TXT).
+> **Please provide the path to your standard resume file** (PDF, DOCX, or TXT) **AND the path to your master CV** (DOCX format).
 >
-> For example: `~/Documents/resume.pdf` or `/Users/you/Desktop/MyResume.pdf`
+> For example: `~/Documents/resume.pdf` and `~/Documents/master-cv.docx`
 
-Then wait for the user to provide the path before proceeding with profile extraction.
+Then wait for the user to provide both paths before proceeding with profile extraction.
 
 **If the profile contains applicant data**, say:
 
@@ -45,8 +45,9 @@ Then wait for the user to provide the path before proceeding with profile extrac
 
 ## Required Input
 
-- **Resume file path**: Path to your resume (PDF, DOCX, or TXT format)
-- **Job URL**: LinkedIn job posting or direct application link
+- **Standard Resume file path**: Path to your standard resume (PDF, DOCX, or TXT format)
+- **Master CV file path**: Path to your master CV (strictly DOCX format) for automated tailoring
+- **Job URL**: LinkedIn job posting, LinkedIn Jobs Tracker URL (`https://www.linkedin.com/jobs-tracker/`), or direct application link
 - **Auto-submit flag** (optional): If the user explicitly includes "submit", "auto-submit", or "submit for me" in their request, the skill will proceed past the review page and complete submission after filling the application. Without this flag, the default behavior is to stop at the review page.
 
 ## Profile Storage
@@ -109,6 +110,18 @@ If `profile-get` returns an empty object, or if the user requests a reset:
 3. **Present extracted data to user** for review and correction
 4. **Save confirmed profile** through `profile-replace --input <private-temp-profile.json>`, then remove the temporary input
 
+### Phase 1.5: Job Selection (If starting from a Tracker)
+
+If the user provides a tracker URL (e.g., `https://www.linkedin.com/jobs-tracker/`):
+1. **Navigate to the tracker URL** in the host-managed visible browser.
+2. **Locate the first job listed** in the tracker.
+3. **Click on the first job** to open its specific application pane or page.
+4. **Extract the job requirements** from the job description text on the page. Keep these requirements in context.
+5. **Evaluate the standard resume** against the extracted job requirements. 
+   - If the standard resume is a strong match (no modifications required), proceed to Phase 2.
+   - If the standard resume is a weak match, read the Master CV and write a python script (using `python-docx` or similar) to generate a new, tailored CV (`tailored-cv.docx`) that better aligns with the job requirements. Ensure the script preserves the exact design, formatting, and layout of the original CV. Save it to a temporary directory.
+6. Proceed to Phase 2 for this specific job application.
+
 ### Phase 2: Application Filling
 
 1. **Initialize and load storage** through the bundled `answer-memory` skill; use `profile-get`, then check `session-list` for resumable work matching this application
@@ -118,7 +131,7 @@ If `profile-get` returns an empty object, or if the user requests a reset:
 5. **Read the form** and fill profile-backed fields; for recurring questions call `answer-find` with the exact visible question and relevant scope
 6. **Reuse only matching, non-sensitive `confirmed` answers**. Show and confirm `inferred` answers, ask for `missing` answers, and reconfirm every `sensitive` answer before entry
 7. **Separate fill consent from remember consent** for salary, work authorization, visa status, demographic information, disability disclosure, and similar answers. Use `--remember-sensitive` only after explicit field-specific permission to remember
-8. **Upload the resume** through the visible file control and verify the selected filename
+8. **Upload the resume** through the visible file control and verify the selected filename. Use the newly tailored `.docx` CV if one was generated in Phase 1.5; otherwise, use the standard resume.
 9. **Save resumable progress** through `session-save`; store answer keys and pending-field states, never answer values
 10. **Handle inaccessible controls** using the optional fallback rules above, or leave the field for the user
 11. **Advance through non-final steps** only when the control is clearly Next, Continue, Save, or Review
@@ -329,4 +342,10 @@ Claude Code: /job-apply:athena https://www.linkedin.com/jobs/view/123456789
 Codex: $job-apply:athena https://www.linkedin.com/jobs/view/123456789 submit
 Claude Code: /job-apply:athena https://www.linkedin.com/jobs/view/123456789 submit
 User: Apply to this job and submit for me: https://www.linkedin.com/jobs/view/123456789
+```
+
+**From Jobs Tracker:**
+```
+Codex: $job-apply:athena https://www.linkedin.com/jobs-tracker/
+Claude Code: /job-apply:athena https://www.linkedin.com/jobs-tracker/
 ```
