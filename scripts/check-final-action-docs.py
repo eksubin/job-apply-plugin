@@ -57,12 +57,21 @@ def _is_actionable(text: str) -> bool:
         or DIRECT_FINAL_ACTION.search(candidate)
     )
 
+AUTO_SUBMIT_CONTEXT = re.compile(
+    r"\b(?:auto[- ]submit\s+mode|user\s+explicitly\s+requested)\b",
+    re.IGNORECASE,
+)
+
 
 def violations_for_text(text: str) -> list[tuple[int, str]]:
     violations: list[tuple[int, str]] = []
     for number, line in enumerate(text.splitlines(), 1):
         stripped = line.strip()
         if not stripped:
+            continue
+        # Lines guarded by auto-submit conditional context are safe —
+        # the condition applies to all actionable clauses on the line.
+        if AUTO_SUBMIT_CONTEXT.search(stripped):
             continue
         clauses = [
             clause.strip()

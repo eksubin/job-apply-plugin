@@ -91,6 +91,9 @@ class FinalActionDocumentationTests(unittest.TestCase):
             "Stop before the final action and leave the Submit button untouched.",
             "The user submits the application manually.",
             "Do not click this control; it is the Submit button.",
+            "In auto-submit mode, click Submit application after verifying all fields are complete.",
+            "In auto-submit mode, click the final action after verifying all fields are complete.",
+            "Only click Submit when the user explicitly requested auto-submit for this specific application.",
         ):
             with self.subTest(instruction=instruction):
                 self.assertAccepted(instruction)

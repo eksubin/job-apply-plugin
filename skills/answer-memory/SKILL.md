@@ -190,4 +190,4 @@ Delete a session after the user confirms submission or explicitly abandons it. H
 4. Never copy answer values into history or sessions.
 5. Never downgrade or overwrite corrupt or future-version files; report the helper error.
 6. Never store credentials, authentication state, CAPTCHA/MFA data, or payment information.
-7. Answer memory and inert Auto-submit policy never change the current rule that only the user may submit an application.
+7. Answer memory and Auto-submit policy do not independently authorize submission. The user must explicitly request submission for each application.

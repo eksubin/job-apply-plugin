@@ -172,7 +172,7 @@ class AnswerMemoryIntegrationTests(unittest.TestCase):
         self.assertIn("--remember-sensitive", skills["answer-memory"])
         self.assertIn("Permission to fill is not permission to remember", skills["answer-memory"])
         self.assertIn(
-            "User confirmation never authorizes this skill to click Submit",
+            "Submit only when explicitly requested",
             skills["job-apply"],
         )
         self.assertIn("review_only", skills["job-apply"])
@@ -184,8 +184,7 @@ class AnswerMemoryIntegrationTests(unittest.TestCase):
         ).read_text()
         self.assertIn("Greenhouse, LinkedIn Easy Apply, Ashby, and Lever", storage_contract)
         self.assertIn("isolated loopback QA adapter", skills["job-apply"])
-        self.assertIn("Every live Submit", skills["job-apply"])
-        self.assertIn("separately audited canary", skills["job-apply"])
+        self.assertIn("user explicitly requested auto-submit", skills["job-apply"])
         self.assertIn("Auto-submit policy", skills["answer-memory"])
 
     def test_lever_replay_lifecycle_uses_value_free_store_records(self):

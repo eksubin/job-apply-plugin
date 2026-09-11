@@ -47,6 +47,7 @@ Then wait for the user to provide the path before proceeding with profile extrac
 
 - **Resume file path**: Path to your resume (PDF, DOCX, or TXT format)
 - **Job URL**: LinkedIn job posting or direct application link
+- **Auto-submit flag** (optional): If the user explicitly includes "submit", "auto-submit", or "submit for me" in their request, the skill will proceed past the review page and complete submission after filling the application. Without this flag, the default behavior is to stop at the review page.
 
 ## Profile Storage
 
@@ -121,10 +122,22 @@ If `profile-get` returns an empty object, or if the user requests a reset:
 9. **Save resumable progress** through `session-save`; store answer keys and pending-field states, never answer values
 10. **Handle inaccessible controls** using the optional fallback rules above, or leave the field for the user
 11. **Advance through non-final steps** only when the control is clearly Next, Continue, Save, or Review
-12. **Stop at final review** before any Submit, Send, or equivalent final-action button
-13. **Record a minimal `reviewed` history event** with answer-key references (or use the required coordinator `reviewed` command for approved local QA), summarize every entered value, identify anything incomplete or uncertain, and tell the user to inspect the page and submit manually
+12. **Reach the final review page** before any Submit, Send, or equivalent final-action button
+13. **Record a minimal `reviewed` history event** with answer-key references (or use the required coordinator `reviewed` command for approved local QA), and summarize every entered value, identifying anything incomplete or uncertain
 
-User confirmation never authorizes this skill to click Submit, Send, or any equivalent final-action button.
+### Phase 3: Final Action
+
+**Default mode (no auto-submit requested):**
+- Stop at the review page, tell the user to inspect and submit manually. Do not click Submit, Send, or any equivalent final-action button.
+
+**Auto-submit mode (user explicitly requested submission):**
+- After recording the `reviewed` event and summarizing all entered values, verify there are **no incomplete or uncertain fields**. If any field is incomplete or uncertain, stop and ask the user to resolve them before proceeding.
+- If everything looks complete, in auto-submit mode, click the Submit, Send, Apply, or equivalent final-action button.
+- Wait for the confirmation page to load and verify the submission was successful.
+- Record a `completed` history event through `history-append`.
+- Report the result to the user (success or failure).
+
+Auto-submit mode requires the user to explicitly say "submit", "auto-submit", or "submit for me" in their invocation for the current application. A previous auto-submit request does not carry over to new applications.
 
 ---
 
@@ -146,7 +159,7 @@ User confirmation never authorizes this skill to click Submit, Send, or any equi
    - Work authorization questions (dropdowns)
    - Custom screening questions (varies by employer)
 4. Click "Next" to advance, "Review" on final step
-5. Stop on the review page, summarize all entered fields, and leave "Submit application" untouched for the user
+5. On the review page, summarize all entered fields. In default mode, leave "Submit application" untouched for the user. In auto-submit mode, click "Submit application" after verifying all fields are complete
 
 **Field patterns to look for:**
 - `input[name*="phone"]` - Phone number
@@ -173,7 +186,7 @@ User confirmation never authorizes this skill to click Submit, Send, or any equi
 6. Education section similar pattern
 7. Handle custom questions at bottom
 8. Upload the resume through the visible file control and confirm the filename
-9. Stop before the final "Submit Application" button, summarize the fields, and hand control to the user
+9. At the final "Submit Application" button, summarize the fields. In default mode, stop and hand control to the user. In auto-submit mode, click "Submit Application" after verifying all fields are complete
 
 **Field patterns:**
 - Standard `<input>` and `<select>` elements
@@ -194,7 +207,7 @@ User confirmation never authorizes this skill to click Submit, Send, or any equi
 4. **Location combobox**: Type the location to trigger suggestions, then click the matching option
 5. **Resume upload**: Use the resume field, not the separate autofill file input, and verify the filename
 6. Review all visible values
-7. Stop before the final action, summarize the fields, and let the user submit manually
+7. At the final action, summarize the fields. In default mode, stop and let the user submit manually. In auto-submit mode, click the final action after verifying all fields are complete
 
 ### Lever
 
@@ -210,7 +223,7 @@ User confirmation never authorizes this skill to click Submit, Send, or any equi
 3. Read the visible form structure and fill text fields
 4. **Radio buttons**: If a custom overlay blocks a control, follow the optional fallback rules or leave it for the user
 5. **Resume upload**: Use the visible resume file control and verify the filename
-6. Review all fields, stop before the final action, and let the user submit manually
+6. Review all fields. In default mode, stop before the final action and let the user submit manually. In auto-submit mode, click the final action after verifying all fields are complete
 
 ### Rippling
 
@@ -226,7 +239,7 @@ User confirmation never authorizes this skill to click Submit, Send, or any equi
 4. Correct any mis-parsed fields
 5. **Location combobox**: Clear existing value, type the correct location, wait for dropdown, click match
 6. Fill any remaining required fields
-7. Review the parsed and entered values, stop before the final action, and let the user submit manually
+7. Review the parsed and entered values. In default mode, stop before the final action and let the user submit manually. In auto-submit mode, click the final action after verifying all fields are complete
 
 ### Workday
 
@@ -241,7 +254,7 @@ User confirmation never authorizes this skill to click Submit, Send, or any equi
 3. Read the visible form structure on each page
 4. For dropdowns: open the field, read the visible options, then choose the supported value
 5. For date fields: May need to click calendar icon, then select date
-6. Use "Save and Continue" for intermediate steps, but stop before "Submit" or any equivalent final action
+6. Use "Save and Continue" for intermediate steps. In default mode, stop before "Submit" or any equivalent final action. In auto-submit mode, click "Submit" after verifying all fields are complete on the review page
 7. Upload the resume through the visible file control and verify the filename
 
 **Special handling:**
@@ -280,7 +293,7 @@ User confirmation never authorizes this skill to click Submit, Send, or any equi
 2. Fill standard fields and use visible controls for dropdowns, radio buttons, and checkboxes.
 3. Upload the resume through the page's file control and verify the displayed filename.
 4. After each non-final Next, Continue, or Save action, read the new page before proceeding.
-5. When Review, Submit, Send, or an equivalent final action appears, stop and summarize the application for the user.
+5. When Review, Submit, Send, or an equivalent final action appears, summarize the application. In default mode, stop for the user. In auto-submit mode, click the final action after verifying all fields are complete.
 
 ### Separate Playwright Integration (Claude Code Optional Fallback Only)
 
@@ -292,19 +305,28 @@ In Codex, stay inside the selected Browser plugin surface. In Claude Code, if a 
 
 1. **Never handle credentials** - Pause for the user to complete login, password, CAPTCHA, and MFA steps
 2. **Never create accounts** - Pause so the user can decide and create an account themselves
-3. **Never submit live applications without the separate canary gate** - Stop at final review; a policy decision or synthetic confirmation never authorizes a live Submit, Send, or equivalent action
-4. **Never enter payment information** - Some applications have optional premium features
-5. **Handle sensitive questions carefully** - Salary expectations, visa status, disability disclosure should be confirmed with user before filling
-6. **Use the host-managed visible browser by default** - Codex stays within its Browser plugin; Claude Code may use an already-configured Playwright fallback for one inaccessible control
-7. **Never store or pass login credentials between tools** - Authentication remains a user-only step in the visible Chrome session
-8. **Use answer memory only through the helper** - Never directly modify `~/.job-apply/`; history and sessions reference answer keys, not values
-9. **Remembering is separate consent** - Permission to use a sensitive answer now never authorizes storing it for later
+3. **Submit only when explicitly requested** - By default, stop at final review and let the user submit manually. Only click Submit, Send, or an equivalent final-action button when the user explicitly requested auto-submit for this specific application. A previous auto-submit request does not carry over to new applications.
+4. **Never submit with incomplete fields** - Even in auto-submit mode, if any field is incomplete, uncertain, or flagged, stop and ask the user before proceeding
+5. **Never enter payment information** - Some applications have optional premium features
+6. **Handle sensitive questions carefully** - Salary expectations, visa status, disability disclosure should be confirmed with user before filling
+7. **Use the host-managed visible browser by default** - Codex stays within its Browser plugin; Claude Code may use an already-configured Playwright fallback for one inaccessible control
+8. **Never store or pass login credentials between tools** - Authentication remains a user-only step in the visible Chrome session
+9. **Use answer memory only through the helper** - Never directly modify `~/.job-apply/`; history and sessions reference answer keys, not values
+10. **Remembering is separate consent** - Permission to use a sensitive answer now never authorizes storing it for later
 
 ---
 
-## Example Invocation
+## Example Invocations
 
+**Default (stop at review):**
 ```
 Codex: $job-apply:job-apply https://www.linkedin.com/jobs/view/123456789
 Claude Code: /job-apply:job-apply https://www.linkedin.com/jobs/view/123456789
+```
+
+**Auto-submit (fill and submit):**
+```
+Codex: $job-apply:job-apply https://www.linkedin.com/jobs/view/123456789 submit
+Claude Code: /job-apply:job-apply https://www.linkedin.com/jobs/view/123456789 submit
+User: Apply to this job and submit for me: https://www.linkedin.com/jobs/view/123456789
 ```
