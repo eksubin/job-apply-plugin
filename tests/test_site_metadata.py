@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SITE_ORIGIN = "https://job-apply.neonwatty.com/"
+SITE_ORIGIN = "https://eksubin.github.io/job-apply-plugin/"
 
 
 class MetadataParser(HTMLParser):
@@ -26,9 +26,9 @@ class SiteMetadataTests(unittest.TestCase):
         parser = MetadataParser()
         parser.feed((REPO_ROOT / "site" / "index.html").read_text())
 
-        self.assertEqual(
-            (REPO_ROOT / "site" / "CNAME").read_text().strip(),
-            "job-apply.neonwatty.com",
+        self.assertFalse(
+            (REPO_ROOT / "site" / "CNAME").exists(),
+            "site is served from the GitHub Pages default domain, so no CNAME is expected",
         )
         self.assertEqual(parser.canonical, SITE_ORIGIN)
         self.assertEqual(parser.open_graph_url, SITE_ORIGIN)

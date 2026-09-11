@@ -6,7 +6,7 @@
     "name": "Jeremy Watt",
     "url": "https://github.com/neonwatty"
   },
-  "homepage": "https://neonwatty.github.io/job-apply-plugin/",
+  "homepage": "https://eksubin.github.io/job-apply-plugin/",
   "repository": "https://github.com/eksubin/job-apply-plugin",
   "license": "MIT",
   "keywords": [
@@ -30,7 +30,7 @@
       "Read",
       "Write"
     ],
-    "websiteURL": "https://neonwatty.github.io/job-apply-plugin/",
+    "websiteURL": "https://eksubin.github.io/job-apply-plugin/",
     "defaultPrompt": [
       "Fill this job application from my resume.",
       "Review my saved application answers.",
