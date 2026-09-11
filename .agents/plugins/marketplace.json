@@ -1,7 +1,7 @@
 {
-  "name": "neonwatty-plugins",
+  "name": "eksubin-plugins",
   "interface": {
-    "displayName": "Neonwatty Plugins"
+    "displayName": "Eksubin Plugins"
   },
   "plugins": [
     {

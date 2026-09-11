@@ -361,8 +361,8 @@ PY
 
 echo "Installing fixture with isolated CLAUDE_CONFIG_DIR=$SMOKE_CLAUDE_CONFIG_DIR"
 CLAUDE_CONFIG_DIR="$SMOKE_CLAUDE_CONFIG_DIR" claude plugin marketplace add "$SMOKE_FIXTURE_DIR"
-CLAUDE_CONFIG_DIR="$SMOKE_CLAUDE_CONFIG_DIR" claude plugin install job-apply@neonwatty-plugins
-CLAUDE_CONFIG_DIR="$SMOKE_CLAUDE_CONFIG_DIR" claude plugin details job-apply@neonwatty-plugins \
+CLAUDE_CONFIG_DIR="$SMOKE_CLAUDE_CONFIG_DIR" claude plugin install job-apply@eksubin-plugins
+CLAUDE_CONFIG_DIR="$SMOKE_CLAUDE_CONFIG_DIR" claude plugin details job-apply@eksubin-plugins \
   | tee "$SMOKE_TEMP_ROOT/plugin-details.txt"
 
 for skill in answer-memory athena job-search job-preferences; do
@@ -380,15 +380,15 @@ import sys
 
 plugins = json.load(open(sys.argv[1]))
 serialized = json.dumps(plugins)
-if "job-apply@neonwatty-plugins" not in serialized:
-    raise SystemExit("isolated plugin list does not contain job-apply@neonwatty-plugins")
+if "job-apply@eksubin-plugins" not in serialized:
+    raise SystemExit("isolated plugin list does not contain job-apply@eksubin-plugins")
 print("Isolated Claude Code marketplace install passed")
 PY
 
 echo "Installing fixture with isolated CODEX_HOME=$SMOKE_CODEX_HOME"
 CODEX_HOME="$SMOKE_CODEX_HOME" codex plugin marketplace add "$SMOKE_FIXTURE_DIR" --json \
   > "$SMOKE_TEMP_ROOT/codex-marketplace-add.json"
-CODEX_HOME="$SMOKE_CODEX_HOME" codex plugin add job-apply@neonwatty-plugins --json \
+CODEX_HOME="$SMOKE_CODEX_HOME" codex plugin add job-apply@eksubin-plugins --json \
   > "$SMOKE_TEMP_ROOT/codex-plugin-add.json"
 CODEX_HOME="$SMOKE_CODEX_HOME" codex plugin list --json \
   > "$SMOKE_TEMP_ROOT/codex-plugin-list.json"
@@ -401,13 +401,13 @@ from pathlib import Path
 plugins = json.load(open(sys.argv[1]))
 installed = plugins.get("installed", [])
 match = next(
-    (plugin for plugin in installed if plugin.get("pluginId") == "job-apply@neonwatty-plugins"),
+    (plugin for plugin in installed if plugin.get("pluginId") == "job-apply@eksubin-plugins"),
     None,
 )
 if not match or not match.get("enabled"):
     raise SystemExit("isolated Codex plugin list does not contain an enabled job-apply plugin")
 
-cache_root = Path(sys.argv[2]) / "plugins" / "cache" / "neonwatty-plugins" / "job-apply"
+cache_root = Path(sys.argv[2]) / "plugins" / "cache" / "eksubin-plugins" / "job-apply"
 versions = [path for path in cache_root.iterdir() if path.is_dir()]
 if len(versions) != 1:
     raise SystemExit(f"expected one isolated Codex plugin version, found {len(versions)}")

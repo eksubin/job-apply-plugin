@@ -60,8 +60,8 @@ Codex stays inside its selected Browser plugin surface. Claude Code does not req
 ### Codex
 
 ```bash
-codex plugin marketplace add neonwatty/job-apply-plugin
-codex plugin add job-apply@neonwatty-plugins
+codex plugin marketplace add eksubin/job-apply-plugin
+codex plugin add job-apply@eksubin-plugins
 ```
 
 Start a new Codex task after installation, then invoke `$job-apply:athena`.
@@ -69,8 +69,8 @@ Start a new Codex task after installation, then invoke `$job-apply:athena`.
 ### Claude Code
 
 ```bash
-claude plugin marketplace add neonwatty/job-apply-plugin
-claude plugin install job-apply@neonwatty-plugins
+claude plugin marketplace add eksubin/job-apply-plugin
+claude plugin install job-apply@eksubin-plugins
 ```
 
 Start a new Claude Code session after installation, then invoke `/job-apply:athena`.
