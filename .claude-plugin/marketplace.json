@@ -11,7 +11,7 @@
       "name": "job-apply",
       "source": {
         "source": "github",
-        "repo": "erattas/job-apply-plugin"
+        "repo": "eksubin/job-apply-plugin"
       },
       "description": "AI-powered job application assistant for Claude Code and Codex covering LinkedIn, Greenhouse, Ashby, Lever, Rippling, and Workday",
       "category": "productivity"
