@@ -1,10 +1,10 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "neonwatty-plugins",
-  "description": "Job Apply plugins for Codex and Claude Code by Jeremy Watt",
+  "name": "eksubin-plugins",
+  "description": "Job Apply plugins for Codex and Claude Code",
   "owner": {
     "name": "erattas",
-    "github": "erattas"
+    "github": "eksubin"
   },
   "plugins": [
     {
