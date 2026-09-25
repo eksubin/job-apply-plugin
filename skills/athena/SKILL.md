@@ -1,7 +1,7 @@
 ---
 name: athena
 description: Fill out job applications automatically using your resume. Use when the user wants to apply for jobs on LinkedIn Easy Apply, Greenhouse, Ashby, Lever, Rippling, or Workday. Formerly known as job-apply.
-allowed-tools: Read, Write, Bash, mcp__claude-in-chrome__*, mcp__plugin_playwright_playwright__*
+allowed-tools: Read, Write, Bash, mcp__browseros-neo__*, mcp__claude-in-chrome__*, mcp__plugin_playwright_playwright__*
 ---
 
 # Athena — Job Application Assistant
@@ -66,15 +66,15 @@ The policy store contains only opaque references, SHA-256 revision fingerprints,
 
 ## Browser Routing
 
-Use the active host's supported visible browser integration so the user can see navigation, authenticated state, entered values, uploads, and the final review page.
+**BrowserOS neo is the default browser for both hosts.** It runs the user's own persistent, signed-in browser profile, so the user can see navigation, authenticated state, entered values, uploads, and the final review page.
 
-- **Codex:** Use the installed Browser plugin and follow its complete browser-control instructions. When the job URL is known, let the Browser runtime select the appropriate in-app or Chrome surface for that URL. Reuse that browser binding and visible tab throughout the application. Do not substitute an unrelated browser automation server.
-- **Claude Code:** Use Claude in Chrome as the default and only required browser integration.
+- **Codex and Claude Code (default):** Use BrowserOS neo (the `browseros-neo` skill / `mcp__browseros-neo__*`) first for LinkedIn and every external application portal. Reuse the same BrowserOS neo session and visible tab throughout the application.
+- **Fallback only:** Fall back to Codex's installed Browser plugin/Chrome surface, or Claude in Chrome, only if BrowserOS neo is unreachable, fails to connect, or cannot drive a required control for the rest of that application. Tell the user when a fallback happens.
 
 ### Visible-Browser Rules
 
-- Use Codex Browser/Chrome or Claude in Chrome for LinkedIn and every external application portal, according to the active host.
-- Use the user's existing authenticated Chrome session, but never ask for, read, store, or enter credentials.
+- Use BrowserOS neo for LinkedIn and every external application portal by default; fall back to Codex Browser/Chrome or Claude in Chrome only per the rule above.
+- Use the user's existing authenticated session, but never ask for, read, store, or enter credentials.
 - Pause for the user to handle login, password, CAPTCHA, MFA, consent prompts, or account creation.
 - Use Chrome's visible form controls and local file-upload support. Confirm the selected filename after an upload.
 - If an Apply link opens an external portal or a new tab, continue there in the same host-managed visible browser session.
@@ -126,7 +126,7 @@ If the user provides a tracker URL (e.g., `https://www.linkedin.com/jobs-tracker
 4. **Open the application form**; if an Apply link opens an external portal, continue in that visible host-managed tab
 5. **Read the form** and fill profile-backed fields; for recurring questions call `answer-find` with the exact visible question and relevant scope
 6. **Reuse only matching, non-sensitive `confirmed` answers**. Show and confirm `inferred` answers, ask for `missing` answers, and reconfirm every `sensitive` answer before entry
-7. **Separate fill consent from remember consent** for salary, work authorization, visa status, demographic information, disability disclosure, and similar answers. Use `--remember-sensitive` only after explicit field-specific permission to remember
+7. **Separate fill consent from remember consent** for work authorization, visa status, demographic information, disability disclosure, and similar answers. Use `--remember-sensitive` only after explicit field-specific permission to remember. **Salary expectation fields** may be auto-filled with a reasonable market-average estimate for the role, level, and location without asking each time; surface the estimate in the final review summary so the user can correct it before submitting
 8. **Upload the resume** through the visible file control and verify the selected filename. Use the newly tailored `.docx` CV if one was generated in Phase 1.5; otherwise, use the standard resume.
 9. **Save resumable progress** through `session-save`; store answer keys and pending-field states, never answer values
 10. **Handle inaccessible controls** using the fallback rules in `references/browser-fallback.md`, or leave the field for the user
@@ -147,7 +147,11 @@ If the user provides a tracker URL (e.g., `https://www.linkedin.com/jobs-tracker
 - Record a `completed` history event through `history-append`.
 - Report the result to the user (success or failure).
 
-Auto-submit mode requires the user to explicitly say "submit", "auto-submit", or "submit for me" in their invocation for the current application. A previous auto-submit request does not carry over to new applications.
+Auto-submit mode requires the user to explicitly say "submit", "auto-submit", or "submit for me" for the current application, or to answer yes to the batch auto-submit consent question (below) when applying to several jobs from one request. A previous auto-submit request does not carry over to a new, separate request.
+
+### Batch Auto-Submit Consent
+
+When the user asks to apply to more than one job in a single request (a list of URLs, or a Jobs Tracker run), ask once, before starting: **"Do you want me to automatically submit and complete these applications, or stop at the review page for each one?"** Apply the answer to every job in that request — yes enables auto-submit for the whole batch (subject to the completeness check in Safety Rule 4 for each job), no keeps review-only for the whole batch. This batch answer does not carry over to a later, separate request.
 
 ---
 
@@ -192,7 +196,7 @@ Do not apply another portal's guidance to the site in front of you.
 
 ## Browser Tool Usage
 
-### Codex Browser or Claude in Chrome (Default)
+### BrowserOS neo (Default), Codex Browser, or Claude in Chrome (Fallback)
 
 1. Read the visible page and identify interactive fields.
 2. Fill standard fields and use visible controls for dropdowns, radio buttons, and checkboxes.
@@ -213,7 +217,7 @@ See `references/browser-fallback.md`.
 3. **Submit only when explicitly requested** - By default, stop at final review and let the user submit manually. Only click Submit, Send, or an equivalent final-action button when the user explicitly requested auto-submit for this specific application. A previous auto-submit request does not carry over to new applications.
 4. **Never submit with incomplete fields** - Even in auto-submit mode, if any field is incomplete, uncertain, or flagged, stop and ask the user before proceeding
 5. **Never enter payment information** - Some applications have optional premium features
-6. **Handle sensitive questions carefully** - Salary expectations, visa status, disability disclosure should be confirmed with user before filling
+6. **Handle sensitive questions carefully** - Visa status and disability disclosure must still be confirmed with the user before filling; these are legally protected categories and a stale or wrong auto-fill can misrepresent the user to an employer. Salary expectations may be auto-filled with a market-average estimate (see Phase 2, step 7) without per-instance confirmation, since it carries no legal/discrimination risk and is always visible for correction on the review page
 7. **Use the host-managed visible browser by default** - Codex stays within its Browser plugin; Claude Code may use an already-configured Playwright fallback for one inaccessible control
 8. **Never store or pass login credentials between tools** - Authentication remains a user-only step in the visible Chrome session
 9. **Use answer memory only through the helper** - Never directly modify `~/.job-apply/`; history and sessions reference answer keys, not values
