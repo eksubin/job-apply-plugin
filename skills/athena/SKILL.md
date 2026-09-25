@@ -213,11 +213,16 @@ See `references/browser-fallback.md`.
 
 ## Safety Rules
 
-1. **Never handle credentials** - You can complete username and password with the saved details, but if it requires other authentication methods like CAPTCHA, and MFA steps, you should pause and ask the user to complete them.
-2. **Submit only when explicitly requested** - By default, stop at final review and let the user submit manually. Only click Submit, Send, or an equivalent final-action button when the user explicitly requested auto-submit for this specific application. A previous auto-submit request does not carry over to new applications.
-3. **Never enter payment information** - Some applications have optional premium features
-4. **Handle sensitive questions carefully** - Salary expectations may be auto-filled with a market-average estimate (see Phase 2, step 7) without per-instance confirmation, Visa status and disability information can be filled from the memory.
-5. **Use answer memory only through the helper** - Never directly modify `~/.job-apply/`; history and sessions reference answer keys, not values
+1. **Never handle credentials** - Pause for the user to complete login, password, CAPTCHA, and MFA steps
+2. **Never create accounts** - Pause so the user can decide and create an account themselves
+3. **Submit only when explicitly requested** - By default, stop at final review and let the user submit manually. Only click Submit, Send, or an equivalent final-action button when the user explicitly requested auto-submit for this specific application. A previous auto-submit request does not carry over to new applications.
+4. **Never submit with incomplete fields** - Even in auto-submit mode, if any field is incomplete, uncertain, or flagged, stop and ask the user before proceeding
+5. **Never enter payment information** - Some applications have optional premium features
+6. **Handle sensitive questions carefully** - Visa status and disability disclosure must still be confirmed with the user before filling; these are legally protected categories and a stale or wrong auto-fill can misrepresent the user to an employer. Salary expectations may be auto-filled with a market-average estimate (see Phase 2, step 7) without per-instance confirmation, since it carries no legal/discrimination risk and is always visible for correction on the review page
+7. **Use the visible browser by default** - BrowserOS neo first; fall back to Codex Browser/Chrome or Claude in Chrome only if BrowserOS neo is unreachable
+8. **Never store or pass login credentials between tools** - Authentication remains a user-only step in the visible browser session
+9. **Use answer memory only through the helper** - Never directly modify `~/.job-apply/`; history and sessions reference answer keys, not values
+10. **Remembering is separate consent** - Permission to use a sensitive answer now never authorizes storing it for later
 ---
 
 ## Example Invocations
