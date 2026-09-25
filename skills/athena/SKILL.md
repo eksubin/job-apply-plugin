@@ -79,15 +79,10 @@ Use the active host's supported visible browser integration so the user can see 
 - Use Chrome's visible form controls and local file-upload support. Confirm the selected filename after an upload.
 - If an Apply link opens an external portal or a new tab, continue there in the same host-managed visible browser session.
 
+
 ### Optional Browser Fallback
 
-In Codex, use only the interaction methods exposed by the selected Browser plugin; its Playwright API is part of that browser surface, not a separate integration. In Claude Code, a separate Playwright integration is not required and may be used only when **all** of the following are true:
-
-1. The user already has a Playwright integration configured in Claude Code.
-2. Claude in Chrome cannot reach a specific iframe, upload widget, or custom control after a reasonable visible attempt.
-3. The fallback does not require transferring login state or credentials.
-
-Use the fallback only for the blocked control, then return to the visible review workflow. If these conditions are not met, explain which field is blocked and leave it for the user to complete manually.
+Moved to `references/browser-fallback.md` — read it only when a control is unreachable in the visible browser.
 
 ---
 
@@ -122,6 +117,7 @@ If the user provides a tracker URL (e.g., `https://www.linkedin.com/jobs-tracker
    - If the standard resume is a weak match, read the Master CV and write a python script (using `python-docx` or similar) to generate a new, tailored CV (`tailored-cv.docx`) that better aligns with the job requirements. Ensure the script preserves the exact design, formatting, and layout of the original CV. Save it to a temporary directory.
 6. Proceed to Phase 2 for this specific job application.
 
+
 ### Phase 2: Application Filling
 
 1. **Initialize and load storage** through the bundled `answer-memory` skill; use `profile-get`, then check `session-list` for resumable work matching this application
@@ -133,10 +129,11 @@ If the user provides a tracker URL (e.g., `https://www.linkedin.com/jobs-tracker
 7. **Separate fill consent from remember consent** for salary, work authorization, visa status, demographic information, disability disclosure, and similar answers. Use `--remember-sensitive` only after explicit field-specific permission to remember
 8. **Upload the resume** through the visible file control and verify the selected filename. Use the newly tailored `.docx` CV if one was generated in Phase 1.5; otherwise, use the standard resume.
 9. **Save resumable progress** through `session-save`; store answer keys and pending-field states, never answer values
-10. **Handle inaccessible controls** using the optional fallback rules above, or leave the field for the user
+10. **Handle inaccessible controls** using the fallback rules in `references/browser-fallback.md`, or leave the field for the user
 11. **Advance through non-final steps** only when the control is clearly Next, Continue, Save, or Review
 12. **Reach the final review page** before any Submit, Send, or equivalent final-action button
 13. **Record a minimal `reviewed` history event** with answer-key references (or use the required coordinator `reviewed` command for approved local QA), and summarize every entered value, identifying anything incomplete or uncertain
+
 
 ### Phase 3: Final Action
 
@@ -156,124 +153,19 @@ Auto-submit mode requires the user to explicitly say "submit", "auto-submit", or
 
 ## Platform-Specific Guidance
 
-### LinkedIn Easy Apply
+Guidance for each portal lives in `references/`. Once the job site is identified from the URL,
+read the one matching file and follow it:
 
-**Characteristics:**
-- Modal-based multi-step wizard
-- Usually 2-5 steps: Contact Info → Resume → Additional Questions → Review
-- Has progress indicator at top
+| Site | File |
+|------|------|
+| LinkedIn Easy Apply | `references/linkedin.md` |
+| Greenhouse | `references/greenhouse.md` |
+| Ashby | `references/ashby.md` |
+| Lever | `references/lever.md` |
+| Rippling | `references/rippling.md` |
+| Workday | `references/workday.md` |
 
-**Approach:**
-1. Click "Easy Apply" button to open modal
-2. Use `read_page` on each step to identify fields
-3. Common fields:
-   - Phone number (often pre-filled from LinkedIn)
-   - Resume upload (use the host browser's supported file-chooser flow with the resume path)
-   - Work authorization questions (dropdowns)
-   - Custom screening questions (varies by employer)
-4. Click "Next" to advance, "Review" on final step
-5. On the review page, summarize all entered fields. In default mode, leave "Submit application" untouched for the user. In auto-submit mode, click "Submit application" after verifying all fields are complete
-
-**Field patterns to look for:**
-- `input[name*="phone"]` - Phone number
-- `input[type="file"]` - Resume upload
-- `select`, `[role="listbox"]` - Dropdown questions
-- `[role="radio"]`, `[role="checkbox"]` - Multiple choice
-
-### Greenhouse
-
-**Characteristics:**
-- Single long-form page with sections
-- Clear field labels
-- Often has "Add another" for work history/education
-- May be embedded in an iframe on a company career site
-
-**Approach (visible browser first):**
-1. Navigate to the application URL in the host-managed visible browser
-2. Read the visible form; if an embedded form is inaccessible, follow the optional fallback rules or leave it for the user
-3. Fill from top to bottom
-4. **Phone country code**: Click the country code toggle → select "United States: +1" from the listbox → the phone field auto-formats with +1 prefix
-5. For work history sections:
-   - Fill most recent position
-   - Click "Add another" if form allows and user has more history
-6. Education section similar pattern
-7. Handle custom questions at bottom
-8. Upload the resume through the visible file control and confirm the filename
-9. At the final "Submit Application" button, summarize the fields. In default mode, stop and hand control to the user. In auto-submit mode, click "Submit Application" after verifying all fields are complete
-
-**Field patterns:**
-- Standard `<input>` and `<select>` elements
-- `#first_name`, `#last_name`, `#email`, `#phone` common IDs
-- `.field-container` or `.field` wrapping each question
-
-### Ashby
-
-**Characteristics:**
-- Simple single-page form
-- Fields: name, phone, email, location (combobox), LinkedIn URL, resume upload
-- Has both a resume upload field and a separate autofill file input — use the resume field, not the autofill one
-
-**Approach (visible browser first):**
-1. Navigate to the URL in the host-managed visible browser
-2. Read the visible form structure
-3. Fill text fields (name, phone, email, LinkedIn URL)
-4. **Location combobox**: Type the location to trigger suggestions, then click the matching option
-5. **Resume upload**: Use the resume field, not the separate autofill file input, and verify the filename
-6. Review all visible values
-7. At the final action, summarize the fields. In default mode, stop and let the user submit manually. In auto-submit mode, click the final action after verifying all fields are complete
-
-### Lever
-
-**Characteristics:**
-- Often hosted on the company's own domain (e.g., `company.com/careers/...?lever-source=LinkedIn`)
-- Form typically at the bottom of a long job description page
-- Text fields for name, email, phone, LinkedIn, etc.
-- Radio buttons for screening questions — often use custom overlays that intercept clicks
-
-**Approach (visible browser first):**
-1. Navigate to the URL in the host-managed visible browser
-2. Scroll down to find the application form (usually below job description)
-3. Read the visible form structure and fill text fields
-4. **Radio buttons**: If a custom overlay blocks a control, follow the optional fallback rules or leave it for the user
-5. **Resume upload**: Use the visible resume file control and verify the filename
-6. Review all fields. In default mode, stop before the final action and let the user submit manually. In auto-submit mode, click the final action after verifying all fields are complete
-
-### Rippling
-
-**Characteristics:**
-- Auto-parses uploaded resume to pre-fill fields
-- Upload resume first, then verify/correct auto-filled data
-- Location uses a typeahead combobox
-
-**Approach (visible browser first):**
-1. Navigate to the URL in the host-managed visible browser
-2. **Upload resume first** — Rippling will auto-parse and fill fields
-3. Read the visible form to see what was auto-filled
-4. Correct any mis-parsed fields
-5. **Location combobox**: Clear existing value, type the correct location, wait for dropdown, click match
-6. Fill any remaining required fields
-7. Review the parsed and entered values. In default mode, stop before the final action and let the user submit manually. In auto-submit mode, click the final action after verifying all fields are complete
-
-### Workday
-
-**Characteristics:**
-- Multi-page wizard with heavy JavaScript
-- Non-standard UI components (custom dropdowns, date pickers)
-- Often requires account creation (pause so the user can decide and handle it)
-
-**Approach (visible browser first):**
-1. If login, CAPTCHA, MFA, or account creation is required, pause for the user; never handle credentials or create the account
-2. Navigate through "My Information" → "My Experience" → "Application Questions"
-3. Read the visible form structure on each page
-4. For dropdowns: open the field, read the visible options, then choose the supported value
-5. For date fields: May need to click calendar icon, then select date
-6. Use "Save and Continue" for intermediate steps. In default mode, stop before "Submit" or any equivalent final action. In auto-submit mode, click "Submit" after verifying all fields are complete on the review page
-7. Upload the resume through the visible file control and verify the filename
-
-**Special handling:**
-- Workday dropdowns: Click field → wait → read the visible options → click the supported option
-- Date pickers: Often format-sensitive, try MM/DD/YYYY
-- Required fields marked with asterisk or red border after validation
+Do not apply another portal's guidance to the site in front of you.
 
 ---
 
@@ -310,7 +202,7 @@ Auto-submit mode requires the user to explicitly say "submit", "auto-submit", or
 
 ### Separate Playwright Integration (Claude Code Optional Fallback Only)
 
-In Codex, stay inside the selected Browser plugin surface. In Claude Code, if a separate Playwright integration is already configured and Claude in Chrome cannot reach a specific iframe or custom control, it may be used only for that blocked field. Do not require it, do not transfer authenticated state or credentials, and do not use it to activate Submit, Send, or any equivalent final action. If the fallback is unavailable or unsuccessful, leave the field for the user.
+See `references/browser-fallback.md`.
 
 ---
 
@@ -343,7 +235,6 @@ Codex: $job-apply:athena https://www.linkedin.com/jobs/view/123456789 submit
 Claude Code: /job-apply:athena https://www.linkedin.com/jobs/view/123456789 submit
 User: Apply to this job and submit for me: https://www.linkedin.com/jobs/view/123456789
 ```
-
 **From Jobs Tracker:**
 ```
 Codex: $job-apply:athena https://www.linkedin.com/jobs-tracker/
