@@ -75,7 +75,7 @@ The policy store contains only opaque references, SHA-256 revision fingerprints,
 
 - Use BrowserOS neo for LinkedIn and every external application portal by default; fall back to Codex Browser/Chrome or Claude in Chrome only per the rule above.
 - Use the user's existing authenticated session, but never ask for, read, store, or enter credentials.
-- Pause for the user to handle login, password, CAPTCHA, MFA, consent prompts, or account creation.
+- Pause for the user to handle CAPTCHA, MFA, consent prompts, or account creation.
 - Use Chrome's visible form controls and local file-upload support. Confirm the selected filename after an upload.
 - If an Apply link opens an external portal or a new tab, continue there in the same host-managed visible browser session.
 
@@ -203,6 +203,7 @@ Do not apply another portal's guidance to the site in front of you.
 3. Upload the resume through the page's file control and verify the displayed filename.
 4. After each non-final Next, Continue, or Save action, read the new page before proceeding.
 5. When Review, Submit, Send, or an equivalent final action appears, summarize the application. In default mode, stop for the user. In auto-submit mode, click the final action after verifying all fields are complete.
+6. Use same browser tab to apply to the next job if the first one is done, avoid opening new tabs for each job.
 
 ### Separate Playwright Integration (Claude Code Optional Fallback Only)
 
@@ -212,17 +213,11 @@ See `references/browser-fallback.md`.
 
 ## Safety Rules
 
-1. **Never handle credentials** - Pause for the user to complete login, password, CAPTCHA, and MFA steps
-2. **Never create accounts** - Pause so the user can decide and create an account themselves
-3. **Submit only when explicitly requested** - By default, stop at final review and let the user submit manually. Only click Submit, Send, or an equivalent final-action button when the user explicitly requested auto-submit for this specific application. A previous auto-submit request does not carry over to new applications.
-4. **Never submit with incomplete fields** - Even in auto-submit mode, if any field is incomplete, uncertain, or flagged, stop and ask the user before proceeding
-5. **Never enter payment information** - Some applications have optional premium features
-6. **Handle sensitive questions carefully** - Visa status and disability disclosure must still be confirmed with the user before filling; these are legally protected categories and a stale or wrong auto-fill can misrepresent the user to an employer. Salary expectations may be auto-filled with a market-average estimate (see Phase 2, step 7) without per-instance confirmation, since it carries no legal/discrimination risk and is always visible for correction on the review page
-7. **Use the host-managed visible browser by default** - Codex stays within its Browser plugin; Claude Code may use an already-configured Playwright fallback for one inaccessible control
-8. **Never store or pass login credentials between tools** - Authentication remains a user-only step in the visible Chrome session
-9. **Use answer memory only through the helper** - Never directly modify `~/.job-apply/`; history and sessions reference answer keys, not values
-10. **Remembering is separate consent** - Permission to use a sensitive answer now never authorizes storing it for later
-
+1. **Never handle credentials** - You can complete username and password with the saved details, but if it requires other authentication methods like CAPTCHA, and MFA steps, you should pause and ask the user to complete them.
+2. **Submit only when explicitly requested** - By default, stop at final review and let the user submit manually. Only click Submit, Send, or an equivalent final-action button when the user explicitly requested auto-submit for this specific application. A previous auto-submit request does not carry over to new applications.
+3. **Never enter payment information** - Some applications have optional premium features
+4. **Handle sensitive questions carefully** - Salary expectations may be auto-filled with a market-average estimate (see Phase 2, step 7) without per-instance confirmation, Visa status and disability information can be filled from the memory.
+5. **Use answer memory only through the helper** - Never directly modify `~/.job-apply/`; history and sessions reference answer keys, not values
 ---
 
 ## Example Invocations
